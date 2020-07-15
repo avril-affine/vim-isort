@@ -48,7 +48,7 @@ def count_blank_lines_at_end(lines):
 def _get_isort_config(path):
     if str(path) == "/":
         return None
-    elif Path(f"{path}/setup.cfg").exists() or Path(f"{path}/.isort.cfg").exists():
+    elif Path(f"{path}/pyproject.toml") or Path(f"{path}/setup.cfg").exists() or Path(f"{path}/.isort.cfg").exists():
         return path
     return _get_isort_config(path.parent)
 
