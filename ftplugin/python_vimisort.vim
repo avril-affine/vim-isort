@@ -47,7 +47,7 @@ def count_blank_lines_at_end(lines):
 @lru_cache(maxsize=1)
 def _get_isort_config(path):
     try:
-        git_repo = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).rstrip().decode("utf-8")
+        git_repo = check_output(["git", "rev-parse", "--show-toplevel"]).rstrip().decode("utf-8")
         git_toml = Path(f"{git_repo}/pyproject.toml")
     except CalledProcessError:
         git_toml = None
