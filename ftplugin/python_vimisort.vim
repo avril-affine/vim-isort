@@ -53,14 +53,18 @@ def _get_isort_config(path):
     return _get_isort_config(path.parent)
 
 
-def _isort(text_range):
+def _isort(vim_current):
     if not isort_imported:
         print(
             "No isort python module detected, you should install it. More info at https://github.com/darrikonn/vim-isort"
         )
         return
 
-    settings_path = _get_isort_config(Path(text_range.name))
+    if len(vim_current.range) > 1:
+        text_range = vim_current.range
+    else:
+        text_range = vim_current.buffer
+    settings_path = _get_isort_config(Path(vim_current.buffer.name))
     config = settings.from_path(settings_path)
     config_overrides = {}
     if "virtual_env" in config:
@@ -83,10 +87,10 @@ def _isort(text_range):
 
 
 def isort_file():
-    _isort(vim.current.buffer)
+    _isort(vim.current)
 
 
 def isort_visual():
-    _isort(vim.current.range)
+    _isort(vim.current)
 
 EOF
