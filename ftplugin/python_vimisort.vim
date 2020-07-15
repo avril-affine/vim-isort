@@ -46,9 +46,16 @@ def count_blank_lines_at_end(lines):
 
 @lru_cache(maxsize=1)
 def _get_isort_config(path):
-    if str(path) == "/":
+    try:
+        git_repo = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).rstrip().decode("utf-8")
+        git_toml = Path(f"{git_repo}/pyproject.toml")
+    except CalledProcessError:
+        git_toml = None
+    if git_toml and git_toml.exists():
+        return git_toml
+    elif str(path) == "/":
         return None
-    elif Path(f"{path}/pyproject.toml") or Path(f"{path}/setup.cfg").exists() or Path(f"{path}/.isort.cfg").exists():
+    elif Path(f"{path}/pyproject.toml").exists() or Path(f"{path}/setup.cfg").exists() or Path(f"{path}/.isort.cfg").exists():
         return path
     return _get_isort_config(path.parent)
 
