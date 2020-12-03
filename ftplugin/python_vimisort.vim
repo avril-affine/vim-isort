@@ -31,15 +31,13 @@ isort_v5 = False
 try:
     from isort import SortImports, settings
     isort_v4 = True
-except ImportError:
+except:
     try:
-        from isort import Config, sort_code_string
+        from isort import Config, code
         isort_v5 = True
-    except ImportError:
+    except:
         pass
-
 isort_imported = isort_v4 or isort_v5
-
 
 def count_blank_lines_at_end(lines):
     blank_lines = 0
@@ -49,7 +47,6 @@ def count_blank_lines_at_end(lines):
         else:
             blank_lines += 1
     return blank_lines
-
 
 @lru_cache(maxsize=1)
 def _get_isort_config(path):
@@ -91,9 +88,8 @@ def _isort(vim_current):
     elif isort_v5:
         config = Config(settings_path=settings_path)
         if config.virtual_env:
-            config = Config(config=Config, virtual_env=f"{settings_path}/{config.virtual_env}")
-
-        new_text = sort_code_string("\n".join(text_range), config=Config)
+            config = Config(config=config, virtual_env=f"{settings_path}/{config.virtual_env}")
+        new_text = code("\n".join(text_range), config=config)
     new_lines = new_text.split("\n")
 
     # remove empty lines wrongfully added
