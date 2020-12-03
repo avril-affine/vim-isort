@@ -26,12 +26,19 @@ from sys import version_info
 
 import vim
 
+isort_v4 = False
+isort_v5 = False
 try:
     from isort import SortImports, settings
-
-    isort_imported = True
+    isort_v4 = True
 except ImportError:
-    isort_imported = False
+    try:
+        from isort import Config, sort_code_string
+        isort_v5 = True
+    except ImportError:
+        pass
+
+isort_imported = isort_v4 or isort_v5
 
 
 def count_blank_lines_at_end(lines):
@@ -72,14 +79,21 @@ def _isort(vim_current):
     else:
         text_range = vim_current.buffer
     settings_path = _get_isort_config(Path(vim_current.buffer.name))
-    config = settings.from_path(settings_path)
-    config_overrides = {}
-    if "virtual_env" in config:
-        config_overrides["virtual_env"] = f"{settings_path}/{config['virtual_env']}"
+    if isort_v4:
+        config = settings.from_path(settings_path)
+        config_overrides = {}
+        if "virtual_env" in config:
+            config_overrides["virtual_env"] = f"{settings_path}/{config['virtual_env']}"
 
-    new_text = SortImports(
-        file_contents="\n".join(text_range), settings_path=settings_path, **config_overrides
-    ).output
+        new_text = SortImports(
+            file_contents="\n".join(text_range), settings_path=settings_path, **config_overrides
+        ).output
+    elif isort_v5:
+        config = Config(settings_path=settings_path)
+        if config.virtual_env:
+            config = Config(config=Config, virtual_env=f"{settings_path}/{config.virtual_env}")
+
+        new_text = sort_code_string("\n".join(text_range), config=Config)
     new_lines = new_text.split("\n")
 
     # remove empty lines wrongfully added
